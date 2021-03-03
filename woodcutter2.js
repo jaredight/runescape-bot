@@ -105,4 +105,4 @@ function confirmTree(screen_x, screen_y) {
     return (totalCyan > 12);
 }
 
-//main();
+main();
