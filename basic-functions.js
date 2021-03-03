@@ -4,19 +4,24 @@ var robot = require("robotjs");
 
 module.exports = {
 
-    sleep: function(ms) {
+    sleep: function(ms, randomize=true) {
         //this function has the code wait randomMS milliseconds before continuing execution.
         //randomMs is a pseudo-normally distributed random variable with mean ms and range ms/5. 
-        var radius = ms/10
-        var randomMS = Math.floor(this.gaussianRandom(ms-radius, ms+radius));
+        if (randomize) {
+            var radius = ms/10;
+            var randomMS = Math.floor(this.gaussianRandom(ms-radius, ms+radius));
+        }
+        else {
+            randomMS = ms;
+        }
         Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, randomMS);
     }, 
 
-    rotateCamera: function(sec = 1000) {
+    rotateCamera: function(sec=925, randomize=true, direction='right') {
         console.log("rotating camera");
-        robot.keyToggle('right','down');
-        this.sleep(sec);
-        robot.keyToggle('right','up');
+        robot.keyToggle(direction,'down');
+        this.sleep(sec, randomize);
+        robot.keyToggle(direction,'up');
     }, 
 
     testScreenCapture: function() {
@@ -33,19 +38,25 @@ module.exports = {
 
     hexToRGB: function(h) {
         let r = 0, g = 0, b = 0;
-        // 3 digits
-        if (h.length == 4) {
-        r = "0x" + h[1] + h[1];
-        g = "0x" + h[2] + h[2];
-        b = "0x" + h[3] + h[3];
-
-        // 6 digits
-        } else if (h.length == 6) {
         r = "0x" + h[0] + h[1];
         g = "0x" + h[2] + h[3];
         b = "0x" + h[4] + h[5];
-        }
+        
         return [(+r),(+g),(+b)];
+    },
+
+    getColors: function(start_x, start_y, width=10, height=10) {
+        var img = robot.screen.capture(start_x, start_y, width, height);
+        const colorList = [];
+        for (var i=0; i<width; i++) {
+            for(var j=0; j<height; j++) {
+                var pixelColor = img.colorAt(i, j);
+                if (!colorList.includes(pixelColor)) {
+                    colorList.push(pixelColor);
+                }
+            }            
+        }
+        return colorList;
     },
 
     gaussianRand: function() {

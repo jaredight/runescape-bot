@@ -9,33 +9,36 @@ function main() {
     basic.sleep(6000); // 4000 ms = 4 seconds
     game.openBackpack();
     
-    while(true) {
+    numJugsFilled = 0;
+    while(numJugsFilled < 3610) {
         //open bank chest
         var chest = findBankChest();
-        robot.moveMouse(chest.x, chest.y);
-        robot.mouseClick();
-        basic.sleep(800);
-        
-        //deposit and withdraw jugs
-        emptyBackpack();
-        basic.sleep(1200);
-        withdraw1400Items();
-        basic.sleep(900);
-        closeBank();
-        basic.sleep(1500);
+        if (chest) {
+            robot.moveMouse(chest.x, chest.y);
+            robot.mouseClick();
+            basic.sleep(800);
+
+            //deposit and withdraw jugs
+            emptyBackpack();
+            basic.sleep(1200);
+            withdraw1400Items();
+            basic.sleep(900);
+            closeBank();
+            basic.sleep(1500);
+        }
 
         //select a jug to use on sink
-        var inventory_x1 = 1435;
-        var inventory_y1 = 580;
-        robot.moveMouse(inventory_x1, inventory_y1);
-        robot.mouseClick();
-        basic.sleep(700);
+        game.selectInventory_1_1();
 
         //use jug on sink and wait for jugs to fill up
-        sink = findSink();
-        robot.moveMouse(sink.x, sink.y);
-        robot.mouseClick();
-        basic.sleep(18000);
+        var sink = findSink();
+        if (sink) {
+            robot.moveMouse(sink.x, sink.y);
+            robot.mouseClick();
+            basic.sleep(18000);
+            numJugsFilled += 28;
+            console.log('num jugs filled: ' + numJugsFilled);
+        }
     }
     console.log("done!");
 }
@@ -43,7 +46,8 @@ function main() {
 function findBankChest() {
     var start_x = 50, start_y = 100, width = 1300, height = 550;
     var chestColors = ['543d14', '412e09', '3d2c0f', '49340a', '4e360c'];
-    while (true) {
+    var numRotations = 0;
+    while (numRotations < 5) {
         var img = robot.screen.capture(start_x, start_y, width, height);
         var numUnconfirmedChests = 0;
         for (var i = 0; i < 1000; i++) {
@@ -67,7 +71,9 @@ function findBankChest() {
             }
         }
         basic.rotateCamera();
+        numRotations++;
     }
+    return false;
 }
 
 function confirmBankChest(screen_x, screen_y) {
@@ -113,7 +119,8 @@ function closeBank() {
 function findSink() {
     var start_x = 50, start_y = 100, width = 1300, height = 550;
     var sinkColors = ['514949', '4f4747', '4c4545', '5e5655'];
-    while (true) {
+    var numRotations = 0;
+    while (numRotations < 5) {
         var img = robot.screen.capture(start_x, start_y, width, height);
         var numUnconfirmedSinks = 0;
         for (var i = 0; i < 1000; i++) {
@@ -138,7 +145,10 @@ function findSink() {
             }
         }
         basic.rotateCamera();
+        numRotations++;
     }
+    game.selectInventory_1_1();
+    return false;
 }
 
 function confirmSink(screen_x, screen_y) {
@@ -154,7 +164,7 @@ function confirmSink(screen_x, screen_y) {
             totalCyan++
         }
     }
-    return (totalCyan > 38);
+    return (totalCyan > 43);
 }
 
 main();
